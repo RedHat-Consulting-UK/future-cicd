@@ -1,0 +1,6 @@
+- name: "Install all the things"
+  hosts: localhost
+  connection: local
+
+  roles:
+  - { role: argocd }

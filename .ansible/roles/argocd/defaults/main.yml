@@ -1,0 +1,5 @@
+---
+_namespace: argocd
+
+_retry: 30
+_delay: 10

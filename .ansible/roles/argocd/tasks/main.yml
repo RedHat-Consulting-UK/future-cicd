@@ -1,0 +1,47 @@
+---
+- name: Create namespace for {{ _namespace }}
+  k8s:
+    state: present
+    definition: "{{ lookup('template', role_path ~ '/templates/project.j2' ) | from_yaml }}"
+
+- name: Deploy AgroCD Operator
+  k8s:
+    state: present
+    namespace: "{{ _namespace }}"
+    definition: "{{ lookup('file', role_path ~ '/files/{{ item }}' ) | from_yaml }}"
+  with_items:
+    - operatorgroup.yml
+    - subscription.yml
+
+- name: Wait until csv/argocd-operator.v0.0.5 is Succeeded
+  command: >
+    oc get csv/argocd-operator.v0.0.5 -o jsonpath='{.status.phase}' -n "{{ _namespace }}"
+  register: argocd_csv
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocd_csv.stdout == "Succeeded"
+
+- name: Deploy AgroCD Server
+  k8s:
+    state: present
+    namespace: "{{ _namespace }}"
+    definition: "{{ lookup('file', role_path ~ '/files/argocd.yml' ) | from_yaml }}"
+
+- name: Get ArgoCD route host
+  command: >
+    oc get route/argocd-server -o jsonpath='{.spec.host}' -n "{{ _namespace }}"
+  register: argocd_route
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocd_route.stdout != ""
+
+- name: Wait for ArgoCD route to respond with 200
+  uri:
+    url: "https://{{ argocd_route.stdout }}"
+    method: GET
+    validate_certs: false
+    follow_redirects: yes
+  register: argocdroute_result
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocdroute_result.status == 200
