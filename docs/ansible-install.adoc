@@ -1,0 +1,14 @@
+:data-uri:
+:toc: left
+:sectanchors: true
+:sectlinks: true
+:sectnums: true
+:encoding: UTF-8
+
+== ansible
+
+=== install
+
+- pip install -r requirements.txt
+- ansible-galaxy install -r requirements.yml
+- ansible-playbook install.yml

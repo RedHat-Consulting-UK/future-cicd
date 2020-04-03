@@ -1,0 +1,63 @@
+---
+- name: Get all CSVs
+  command: >
+    oc get csv -n "{{ _namespace }}" -o json --ignore-not-found
+  register: csvs_raw
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: csvs_raw.stdout != ""
+
+- name: Get CSV names
+  command: >
+    jq 'select(.items[].metadata.name | contains("argocd-operator")) | [.items[].metadata.name]'
+  register: csv_names
+  args:
+    stdin: "{{ csvs_raw.stdout | string }}"
+
+- name: Wait until csv/argocd-operator is Succeeded
+  command: >
+    oc get csv/{{ item }} -o jsonpath='{.status.phase}' -n "{{ _namespace }}"
+  with_items:
+    - "{{ csv_names.stdout | from_json | list }}"
+  register: argocd_csv
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocd_csv.stdout == "Succeeded"
+
+- name: Get ArgoCD route host
+  command: >
+    oc get route/argocd-server -o jsonpath='{.spec.host}' -n "{{ _namespace }}"
+  register: argocd_route
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocd_route.stdout != ""
+
+- name: Wait for ArgoCD route to respond with 200
+  uri:
+    url: "https://{{ argocd_route.stdout }}"
+    method: GET
+    validate_certs: false
+    follow_redirects: yes
+  register: argocdroute_result
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocdroute_result.status == 200
+
+- name: Get admin password from secret/argocd-cluster
+  command: oc get secret/argocd-cluster -o jsonpath="{.data.admin\.password}" -n "{{ _namespace }}"
+  register: adminpass_b64
+
+- name: Get ArgoCD OAuth token
+  uri:
+    url: "https://{{ argocd_route.stdout }}/api/v1/session"
+    method: POST
+    validate_certs: false
+    follow_redirects: yes
+    body_format: json
+    body:
+      username: "admin"
+      password: "{{ adminpass_b64.stdout | b64decode }}"
+  register: argocd_token_raw
+  retries: "{{ _retry }}"
+  delay: "{{ _delay }}"
+  until: argocd_token_raw.status == 200

@@ -1,0 +1,10 @@
+- name: "Install all the things"
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  collections:
+    - community.kubernetes
+
+  roles:
+  - { role: argocd }

@@ -1,0 +1,6 @@
+galaxy_info:
+  author: garethahealy
+  description: Role to install future-cicd bits
+  license: Apache-2.0
+  min_ansible_version: 2.9
+  

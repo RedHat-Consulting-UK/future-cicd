@@ -1,0 +1,4 @@
+---
+collections:
+- name: community.kubernetes
+  version: 0.10.0

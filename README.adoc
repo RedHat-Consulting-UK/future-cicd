@@ -1,1 +1,12 @@
+:data-uri:
+:toc: left
+:sectanchors: true
+:sectlinks: true
+:sectnums: true
+:encoding: UTF-8
+
 = future-cicd
+
+include::docs/tools-tools.adoc[]
+
+include::docs/ansible-install.adoc[]

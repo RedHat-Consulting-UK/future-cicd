@@ -1,0 +1,15 @@
+:data-uri:
+:toc: left
+:sectanchors: true
+:sectlinks: true
+:sectnums: true
+:encoding: UTF-8
+
+== tools
+
+== install
+
+- brew install ansible
+- brew install helm
+- brew tap argoproj/tap
+- brew install argoproj/tap/argocd

@@ -1,0 +1,93 @@
+---
+- name: Check if CLIs are installed
+  command: command -v {{ item }}
+  with_items:
+    - helm
+    - argocd
+    - jq
+
+- name: Get helm3 version
+  command: helm version --short
+  register: helm_version
+
+- name: Fail if not helm3
+  fail:
+    msg: "Expected helm to be 'v3' but found '{{ helm_version.stdout }}'"
+  when: '"v3" not in helm_version.stdout'
+
+- name: Who am i?
+  command: oc whoami
+  register: whoami
+
+- name: Create argocd-admins group
+  command: oc adm groups new argocd-admins
+  ignore_errors: yes
+
+- name: Add {{ whoami.stdout | trim }} to argocd-admins group
+  command: oc adm groups add-users argocd-admins {{ whoami.stdout | trim }}
+
+- name: Add helm3 repos
+  command: helm repo add {{ item }}
+  with_items:
+    - rht-labs https://rht-labs.github.io/helm-charts
+    - redhat-consulting-uk-helm3 https://redhat-consulting-uk.github.io/helm3
+
+- name: Update helm3 repos
+  command: helm repo update
+
+- name: Process helm3 bootstrap template
+  command: helm template --dependency-update redhat-consulting-uk-helm3/bootstrap --values {{ role_path }}/files/values-cluster-boostrap.yaml
+  register: bootstrap_template
+
+- name: Process helm3 argocd template
+  command: helm template --dependency-update redhat-consulting-uk-helm3/argocd --values {{ role_path }}/files/values-cluster-argocd.yaml
+  register: argocd_template
+
+- name: Create bootstrap yaml
+  command: oc apply -f -
+  args:
+    stdin: "{{ bootstrap_template.stdout | string }}"
+
+- name: Create argocd yaml
+  command: oc apply -f -
+  args:
+    stdin: "{{ argocd_template.stdout | string }}"
+
+- name: Wait until ArgoCD is running in argocd
+  include_tasks: wait_argocd_running.yml
+  vars:
+    _namespace: argocd
+
+- name: Create ArgoApp for my-project
+  command: >
+    argocd app create my-project
+      --dest-namespace argocd
+      --dest-server https://kubernetes.default.svc
+      --repo https://github.com/RedHat-Consulting-UK/helm3.git
+      --path charts/bootstrap
+      --values values-myproject.yaml
+      --sync-policy automated
+      --auth-token {{ argocd_token_raw.json.token }}
+      --server {{ argocd_route.stdout }}:443
+      --insecure
+
+- name: Sync ArgoApp for my-project
+  command: >
+    argocd app sync my-project
+      --prune
+      --auth-token {{ argocd_token_raw.json.token }}
+      --server {{ argocd_route.stdout }}:443
+      --insecure
+
+- name: Sync ArgoApp for my-project-argocd
+  command: >
+    argocd app sync my-project-argocd
+      --prune
+      --auth-token {{ argocd_token_raw.json.token }}
+      --server {{ argocd_route.stdout }}:443
+      --insecure
+
+- name: Wait until ArgoCD is running in my-project
+  include_tasks: wait_argocd_running.yml
+  vars:
+    _namespace: my-project

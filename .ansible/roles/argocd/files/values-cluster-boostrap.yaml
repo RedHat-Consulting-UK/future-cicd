@@ -1,0 +1,5 @@
+project_namespace: argocd
+
+app-of-apps:
+  applications:
+    - enabled: false

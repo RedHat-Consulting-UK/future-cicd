@@ -1,0 +1,19 @@
+project_namespace: &proj_namespace argocd
+project_destination: "*"
+
+enabled: true
+version: v1.5.2
+dex:
+  version: v2.22.0
+
+operatorhub:
+  operators:
+    - name: argocd-operator
+      namespace: *proj_namespace
+      subscription:
+        channel: alpha
+        approval: Automatic
+        operatorName: argocd-operator
+        sourceName: community-operators
+        sourceNamespace: openshift-marketplace
+        csv: argocd-operator.v0.0.8
