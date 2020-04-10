@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  ubiquitous-journey:
+  - apiVersion: v1
+    appVersion: 0.0.1
+    created: "2020-04-10T12:31:41.626327+01:00"
+    description: A Helm chart for ubiquitous-journey
+    digest: 0334c28a9a66cfedd3e0ec31a5e07df7976985cdb1b1376fdb3a72c9ce3d5e3f
+    name: ubiquitous-journey
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/RedHat-Consulting-UK/future-cicd/master/helm3/ubiquitous-journey-0.0.1.tgz
+    version: 0.0.1
+generated: "2020-04-10T12:31:41.625664+01:00"
