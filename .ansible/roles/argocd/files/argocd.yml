@@ -6,6 +6,4 @@ spec:
   dex:
     openShiftOAuth: true
     version: v2.22.0
-  redis:
-    version: 5.0.8
-  version: v1.5.0
+  version: v1.5.1
