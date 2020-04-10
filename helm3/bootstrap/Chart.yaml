@@ -1,0 +1,20 @@
+apiVersion: v2
+name: bootstrap
+description: A Helm chart to bootstrap a project
+type: application
+
+maintainers:
+  - name: garethahealy
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: 0.1.0
+
+dependencies:
+  - name: ubiquitous-journey
+    version: "0.0.1"
+    repository: https://raw.githubusercontent.com/RedHat-Consulting-UK/future-cicd/master/helm3

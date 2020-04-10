@@ -5,4 +5,21 @@
 :sectnums: true
 :encoding: UTF-8
 
-== todo
+== install tools
+
+CLI Tools on Mac
+- brew install helm
+- brew tap argoproj/tap
+- brew install argoproj/tap/argocd
+
+=== local dev https://github.com/kmzfs/helm-repo-in-github
+
+- helm repo add rht-labs https://rht-labs.github.io/helm-charts
+- helm repo add future-cicd https://raw.githubusercontent.com/RedHat-Consulting-UK/future-cicd/master/helm3
+- helm repo update
+- helm template --dependency-update future-cicd/ubiquitous-journey --values helm3/_values/my-project.yaml | oc apply -n argocd -f -
+
+=== debuging
+
+- helm template --dependency-update bootstrap
+- helm template --dependency-update argocd

@@ -2,9 +2,10 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: argocd
+  namespace: {{ _namespace }}
 spec:
   serviceAccount:
     metadata:
       creationTimestamp: null
   targetNamespaces:
-    - argocd
+    - {{ _namespace }}

@@ -1,0 +1,13 @@
+project_namespace: &proj_namespace my-project
+management_namespace: &management_destination "argocd"
+
+applications:
+  - name: *proj_namespace
+    destination: *management_destination
+    enabled: true
+    source: https://github.com/RedHat-Consulting-UK/future-cicd.git
+    source_path: helm3/bootstrap
+    source_ref: wip
+    sync_policy_automated: true
+    helm_values:
+      - values.yaml

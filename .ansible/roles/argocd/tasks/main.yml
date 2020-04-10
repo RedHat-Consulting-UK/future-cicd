@@ -2,16 +2,18 @@
 - name: Create namespace for {{ _namespace }}
   k8s:
     state: present
-    definition: "{{ lookup('template', role_path ~ '/templates/project.j2' ) | from_yaml }}"
+    definition: "{{ lookup('template', role_path ~ '/templates/{{ item }}' ) | from_yaml }}"
+  with_items:
+    - project.j2
+    - operatorgroup.j2
+    - argocd-clusterrole.j2
+    - argocd-clusterrolebinding.j2
 
 - name: Deploy AgroCD Operator
   k8s:
     state: present
     namespace: "{{ _namespace }}"
-    definition: "{{ lookup('file', role_path ~ '/files/{{ item }}' ) | from_yaml }}"
-  with_items:
-    - operatorgroup.yml
-    - subscription.yml
+    definition: "{{ lookup('file', role_path ~ '/files/subscription.yml' ) | from_yaml }}"
 
 - name: Wait until csv/argocd-operator.v0.0.5 is Succeeded
   command: >
@@ -45,3 +47,6 @@
   retries: "{{ _retry }}"
   delay: "{{ _delay }}"
   until: argocdroute_result.status == 200
+
+- name: Include helm tasks
+  include_tasks: helm.yml

@@ -1,0 +1,23 @@
+---
+- name: Added helm3 repos
+  command: helm repo add {{ item }}
+  with_items:
+    - rht-labs https://rht-labs.github.io/helm-charts
+    - future-cicd https://raw.githubusercontent.com/RedHat-Consulting-UK/future-cicd/master/helm3
+
+- name: Update helm3 repos
+  command: helm repo update
+
+- name: Set helm3 path
+  set_fact:
+    helm3_path: "{{ role_path }}/../../../helm3"
+
+- name: Helm3 template ubiquitous-journey
+  command: "helm template --dependency-update future-cicd/ubiquitous-journey --values {{ helm3_path }}/_values/my-project.yaml"
+  register: helm3_template
+
+- name: Deploy helm3 template
+  k8s:
+    state: present
+    namespace: "{{ _namespace }}"
+    definition: "{{ helm3_template.stdout | from_yaml }}"

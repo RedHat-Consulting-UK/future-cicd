@@ -1,0 +1,16 @@
+{{- if .Values.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: argocd
+  namespace: {{ .Values.project_namespace | quote }}
+  labels:
+    app: argocd
+  annotations:
+    "helm.sh/hook-weight": "10"
+spec:
+  dex:
+    openShiftOAuth: true
+    version: {{ .Values.dex.version | quote }}
+  version: {{ .Values.version | quote }}
+{{- end }}

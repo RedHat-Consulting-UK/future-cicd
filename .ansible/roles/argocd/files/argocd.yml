@@ -1,9 +1,12 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
 metadata:
   name: argocd
 spec:
+  version: v1.5.1
   dex:
     openShiftOAuth: true
     version: v2.22.0
-  version: v1.5.1
+  rbac:
+    defaultPolicy: role:admin

@@ -1,0 +1,14 @@
+project_namespace: my-project
+management_namespace: &management_destination "argocd"
+
+ubiquitous-journey:
+  applications:
+    - name: my-project_argocd
+      destination: *management_destination
+      enabled: true
+      source: https://github.com/RedHat-Consulting-UK/future-cicd.git
+      source_path: helm3/argocd
+      source_ref: wip
+      sync_policy_automated: true
+      helm_values:
+        - values.yaml
